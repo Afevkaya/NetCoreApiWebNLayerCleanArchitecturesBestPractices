@@ -1,4 +1,4 @@
-namespace App.Repositories.Entites;
+namespace App.Repositories.Products;
 
 public class Product
 {

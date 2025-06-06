@@ -1,5 +1,5 @@
 using System.Reflection;
-using App.Repositories.Entites;
+using App.Repositories.Products;
 using Microsoft.EntityFrameworkCore;
 
 namespace App.Repositories.Context;
