@@ -1,4 +1,6 @@
 using App.Repositories.Context;
+using App.Repositories.Products;
+using App.Repositories.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +25,13 @@ public static class RepositoryExtensions
                     npgsqlOptions.MigrationsAssembly(typeof(RepositoryAssembly).Assembly.FullName);
                 });
         });
+        
+        // Register the generic repository
+        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+        // Register specific repositories if needed
+        services.AddScoped<IProductRepository, ProductRepository>();
+        // Register the unit of work
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
