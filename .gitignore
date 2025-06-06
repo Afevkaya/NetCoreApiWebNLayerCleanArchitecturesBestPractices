@@ -1,0 +1,45 @@
+# Build klasörleri
+bin/
+obj/
+
+# Rider ve ReSharper
+.idea/
+*.sln.iml
+riderModule.iml
+/.idea/
+/_ReSharper.Caches/
+*.DotSettings.user
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Paketler
+/packages/
+*.nupkg
+*.snupkg
+
+# Log ve veritabanı dosyaları
+*.log
+*.db
+*.sqlite
+
+# Yaygın ayar dosyaları
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
+
+# Test sonuçları
+TestResults/
+*.trx
+*.coverage
+
+# Publish çıktısı
+publish/
+out/
+
+# Diğer
+*.swp
+*.bak
+*.tmp
