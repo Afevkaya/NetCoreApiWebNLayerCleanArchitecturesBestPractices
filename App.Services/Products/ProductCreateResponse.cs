@@ -1,3 +1,3 @@
 namespace App.Services.Products;
 
-public class ProductCreateResponse(int Id);
+public record ProductCreateResponse(int Id);

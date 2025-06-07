@@ -1,12 +1,24 @@
 using System.Net;
 using App.Repositories.Products;
 using App.Repositories.UnitOfWorks;
+using Microsoft.EntityFrameworkCore;
 
 namespace App.Services.Products;
 
 public class ProductService(IProductRepository productRepository, IUnitOfWork unitOfWork): IProductService
 {
-    public async Task<ServiceResult<List<ProductResponse>>> GetTopPriceProductsAsync(int count)
+    // Fast Fail Pattern: Önce olumsuz durumları kontrol et ve erken çık.
+    // Guard Clause Pattern: Parametrelerin geçerliliğini kontrol et ve hataları erken bildir.
+    public async Task<ServiceResult<List<ProductResponse>>> GetAllAsync()
+    {
+        var products = await productRepository.GetAll().ToListAsync();
+        if (products.Count == 0)
+            return ServiceResult<List<ProductResponse>>.Fail("No products found", HttpStatusCode.NotFound);
+        
+        var productResponses = products.Select(p => new ProductResponse(p.Id, p.Name, p.Price, p.Stock)).ToList();
+        return ServiceResult<List<ProductResponse>>.Success(productResponses);
+    }
+    public async Task<ServiceResult<List<ProductResponse>>> GetTopPriceAsync(int count)
     {
         var products = await productRepository.GetTopPriceProductsAsync(count);
         if (products.Count == 0)
@@ -15,7 +27,7 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         var productResponses = products.Select(p => new ProductResponse(p.Id, p.Name, p.Price, p.Stock)).ToList();
         return ServiceResult<List<ProductResponse>>.Success(productResponses);
     }
-    public async Task<ServiceResult<ProductResponse>> GetProductByIdAsync(int id)
+    public async Task<ServiceResult<ProductResponse>> GetByIdAsync(int id)
     {
         var product = await productRepository.GetByIdAsync(id);
         if (product == null)
@@ -24,7 +36,7 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         var productResponse = new ProductResponse(product.Id, product.Name, product.Price, product.Stock);
         return ServiceResult<ProductResponse>.Success(productResponse);
     }
-    public async Task<ServiceResult<ProductCreateResponse>> CreateProductAsync(ProductCreateRequest request)
+    public async Task<ServiceResult<ProductCreateResponse>> CreateAsync(ProductCreateRequest request)
     {
         if (request == null)
             return ServiceResult<ProductCreateResponse>.Fail("Invalid request");
@@ -42,7 +54,7 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         return result <= 0 ? ServiceResult<ProductCreateResponse>.Fail("Failed to create product", HttpStatusCode.InternalServerError) 
             : ServiceResult<ProductCreateResponse>.Success(new ProductCreateResponse(product.Id));
     }
-    public async Task<ServiceResult> UpdateProductAsync(int id, ProductUpdateRequest request)
+    public async Task<ServiceResult> UpdateAsync(int id, ProductUpdateRequest request)
     {
         if (request == null)
             return ServiceResult.Fail("Invalid request");
@@ -61,7 +73,7 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         return result <= 0 ? ServiceResult.Fail("Failed to update product", HttpStatusCode.InternalServerError) 
             : ServiceResult.Success();
     }
-    public async Task<ServiceResult> DeleteProductAsync(int id)
+    public async Task<ServiceResult> DeleteAsync(int id)
     {
         var product = await productRepository.GetByIdAsync(id);
         if (product == null)
