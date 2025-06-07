@@ -51,7 +51,8 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         await productRepository.InsertAsync(product);
         
         var result = await unitOfWork.CommitAsync();
-        return result <= 0 ? ServiceResult<ProductCreateResponse>.Fail("Failed to create product", HttpStatusCode.InternalServerError) 
+        return result <= 0 
+            ? ServiceResult<ProductCreateResponse>.Fail("Failed to create product", HttpStatusCode.InternalServerError) 
             : ServiceResult<ProductCreateResponse>.Success(new ProductCreateResponse(product.Id));
     }
     public async Task<ServiceResult> UpdateAsync(int id, ProductUpdateRequest request)
@@ -70,8 +71,9 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         productRepository.Update(product);
         var result = await unitOfWork.CommitAsync();
         
-        return result <= 0 ? ServiceResult.Fail("Failed to update product", HttpStatusCode.InternalServerError) 
-            : ServiceResult.Success();
+        return result <= 0 
+            ? ServiceResult.Fail("Failed to update product", HttpStatusCode.InternalServerError) 
+            : ServiceResult.Success(HttpStatusCode.NoContent);
     }
     public async Task<ServiceResult> DeleteAsync(int id)
     {
@@ -82,7 +84,8 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         productRepository.Delete(product);
         var result = await unitOfWork.CommitAsync();
         
-        return result <= 0 ? ServiceResult.Fail("Failed to delete product", HttpStatusCode.InternalServerError) 
-            : ServiceResult.Success();
+        return result <= 0 
+            ? ServiceResult.Fail("Failed to delete product", HttpStatusCode.InternalServerError) 
+            : ServiceResult.Success(HttpStatusCode.NoContent);
     }
 }
