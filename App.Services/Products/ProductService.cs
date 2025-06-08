@@ -18,6 +18,22 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         var productResponses = products.Select(p => new ProductResponse(p.Id, p.Name, p.Price, p.Stock)).ToList();
         return ServiceResult<List<ProductResponse>>.Success(productResponses);
     }
+public async Task<ServiceResult<List<ProductResponse>>> GetPagedAllListAsync(int pageNumber, int pageSize)
+    {
+        if (pageNumber <= 0 || pageSize <= 0)
+            return ServiceResult<List<ProductResponse>>.Fail("Invalid pagination parameters", HttpStatusCode.BadRequest);
+        
+        var products = await productRepository.GetAll()
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        
+        if (products.Count == 0)
+            return ServiceResult<List<ProductResponse>>.Fail("No products found", HttpStatusCode.NotFound);
+        
+        var productResponses = products.Select(p => new ProductResponse(p.Id, p.Name, p.Price, p.Stock)).ToList();
+        return ServiceResult<List<ProductResponse>>.Success(productResponses);
+    }
     public async Task<ServiceResult<List<ProductResponse>>> GetTopPriceAsync(int count)
     {
         var products = await productRepository.GetTopPriceProductsAsync(count);
@@ -53,7 +69,7 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         var result = await unitOfWork.CommitAsync();
         return result <= 0 
             ? ServiceResult<ProductCreateResponse>.Fail("Failed to create product", HttpStatusCode.InternalServerError) 
-            : ServiceResult<ProductCreateResponse>.Success(new ProductCreateResponse(product.Id));
+            : ServiceResult<ProductCreateResponse>.SuccessAsCreated(new ProductCreateResponse(product.Id),$"api/products/{product.Id}");
     }
     public async Task<ServiceResult> UpdateAsync(int id, ProductUpdateRequest request)
     {
@@ -73,7 +89,7 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         
         return result <= 0 
             ? ServiceResult.Fail("Failed to update product", HttpStatusCode.InternalServerError) 
-            : ServiceResult.Success(HttpStatusCode.NoContent);
+            : ServiceResult.Success();
     }
     public async Task<ServiceResult> DeleteAsync(int id)
     {
@@ -86,6 +102,6 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         
         return result <= 0 
             ? ServiceResult.Fail("Failed to delete product", HttpStatusCode.InternalServerError) 
-            : ServiceResult.Success(HttpStatusCode.NoContent);
+            : ServiceResult.Success();
     }
 }
