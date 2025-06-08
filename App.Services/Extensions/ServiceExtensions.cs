@@ -1,4 +1,6 @@
+using System.Reflection;
 using App.Services.Products;
+using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +12,9 @@ public static class ServiceExtensions
     {
         // Register services
         services.AddScoped<IProductService, ProductService>();
+        
+        // Add FluentValidation
+        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
         return services;
     }
