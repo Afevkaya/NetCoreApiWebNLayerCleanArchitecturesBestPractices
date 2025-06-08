@@ -1,0 +1,19 @@
+using FluentValidation;
+
+namespace App.Services.Products;
+
+public class ProductCreateRequestValidator: AbstractValidator<ProductCreateRequest>
+{
+    public ProductCreateRequestValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty().WithMessage("İsim alanı boş olamaz.")
+            .Length(3, 100).WithMessage("İsim alanı 3 ile 100 karakter arasında olmalıdır.");
+
+        RuleFor(x => x.Price)
+            .GreaterThan(0).WithMessage("Fiyat sıfırdan büyük olmalıdır.");
+
+        RuleFor(x => x.Quantity)
+            .GreaterThan(0).WithMessage("Adedi sıfırdan büyük olmalıdır.");
+    }
+}

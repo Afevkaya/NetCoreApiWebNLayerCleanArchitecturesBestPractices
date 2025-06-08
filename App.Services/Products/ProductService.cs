@@ -61,7 +61,7 @@ public async Task<ServiceResult<List<ProductResponse>>> GetPagedAllListAsync(int
         {
             Name = request.Name,
             Price = request.Price,
-            Stock = request.Stock
+            Stock = request.Quantity
         };
         
         await productRepository.InsertAsync(product);

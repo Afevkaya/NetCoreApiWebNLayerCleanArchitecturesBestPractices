@@ -12,10 +12,8 @@ public static class ServiceExtensions
     {
         // Register services
         services.AddScoped<IProductService, ProductService>();
-        
         // Add FluentValidation
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-
         return services;
     }
 }

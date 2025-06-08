@@ -1,13 +1,20 @@
-// App.Api/Program.cs
 using App.Repositories.Extensions;
+using App.Services;
 using App.Services.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Servisleri ekle
-builder.Services.AddControllers();
+// Add services to the container.
+builder.Services.AddControllers(options =>
+{
+    // Add FluentValidation filter globally
+    options.Filters.Add<FluentValidationFilter>();
+    
+    // Remove the default model state validation filter
+    options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+});
 builder.Services.Configure<ApiBehaviorOptions>(options=> options.SuppressModelStateInvalidFilter = true);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddRepositories(builder.Configuration)
