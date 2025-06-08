@@ -8,6 +8,9 @@ namespace App.Services.Extensions;
 
 public static class ServiceExtensions
 {
+    // Eğer fluent validation hataları için kendi filter 'ını yazacaksan assembly 'i ekleyip program.cs de filter ayarlarını yapman yeterli
+    // Eğer custom filter yazmayacaksan SharpGrip.FluentValidation.AutoValidation.Mvc bu pakedi ekleyip
+    // builder.Services.AddFluentValidationAutoValidation(); bu kodu DI container 'a eklemen yeterli
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         // Register services

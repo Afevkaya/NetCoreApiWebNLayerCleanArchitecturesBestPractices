@@ -55,7 +55,10 @@ public async Task<ServiceResult<List<ProductResponse>>> GetPagedAllListAsync(int
     public async Task<ServiceResult<ProductCreateResponse>> CreateAsync(ProductCreateRequest request)
     {
         if (request == null)
-            return ServiceResult<ProductCreateResponse>.Fail("Invalid request");
+            return ServiceResult<ProductCreateResponse>.Fail("Geçersiz istek");
+        var anyProduct = await productRepository.Get(p => p.Name == request.Name).AnyAsync();
+        if (anyProduct)
+            return ServiceResult<ProductCreateResponse>.Fail("Aynı ürün bulunmaktadır ", HttpStatusCode.Conflict);
 
         var product = new Product
         {
