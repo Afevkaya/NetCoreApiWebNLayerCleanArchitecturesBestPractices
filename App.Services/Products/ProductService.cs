@@ -91,6 +91,25 @@ public async Task<ServiceResult<List<ProductResponse>>> GetPagedAllListAsync(int
             ? ServiceResult.Fail("Failed to update product", HttpStatusCode.InternalServerError) 
             : ServiceResult.Success();
     }
+
+    public async Task<ServiceResult> UpdateStockAsync(ProductUpdateStockRequest request)
+    {
+        var product = await productRepository.GetByIdAsync(request.id);
+        if (product == null)
+            return ServiceResult.Fail("Product not found", HttpStatusCode.NotFound);
+
+        if (request.stock < 0)
+            return ServiceResult.Fail("Stock cannot be negative");
+        
+        product.Stock = request.stock;
+        productRepository.Update(product);
+        var result = await unitOfWork.CommitAsync();
+        
+        return result <= 0 
+            ? ServiceResult.Fail("Failed to update product stock", HttpStatusCode.InternalServerError) 
+            : ServiceResult.Success();
+    }
+    
     public async Task<ServiceResult> DeleteAsync(int id)
     {
         var product = await productRepository.GetByIdAsync(id);

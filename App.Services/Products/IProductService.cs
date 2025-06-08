@@ -10,5 +10,6 @@ public interface IProductService
     Task<ServiceResult<ProductResponse>> GetByIdAsync(int id);
     Task<ServiceResult<ProductCreateResponse>> CreateAsync(ProductCreateRequest request);
     Task<ServiceResult> UpdateAsync(int id, ProductUpdateRequest request);
+    Task<ServiceResult> UpdateStockAsync(ProductUpdateStockRequest request);
     Task<ServiceResult> DeleteAsync(int id);
 }

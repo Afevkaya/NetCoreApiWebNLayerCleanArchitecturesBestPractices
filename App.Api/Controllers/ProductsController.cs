@@ -26,6 +26,10 @@ public class ProductsController(IProductService productService) : CustomControll
     public async Task<IActionResult> Update(int id, ProductUpdateRequest request) => 
         CreateActionResult(await productService.UpdateAsync(id,request));
     
+    [HttpPatch("update-stock")]
+    public async Task<IActionResult> UpdateStock(int id, ProductUpdateStockRequest request) =>
+        CreateActionResult(await productService.UpdateStockAsync(request));
+    
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id) => 
         CreateActionResult(await productService.DeleteAsync(id));
