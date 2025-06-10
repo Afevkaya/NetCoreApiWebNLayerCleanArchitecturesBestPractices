@@ -1,4 +1,5 @@
 using System.Reflection;
+using App.Services.ExceptionHandlers;
 using App.Services.Products;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +18,12 @@ public static class ServiceExtensions
         services.AddScoped<IProductService, ProductService>();
         // Add FluentValidation
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        // Add AutoMapper
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        
+        // Exception handling middleware
+        services.AddExceptionHandler<CriticalExceptionHandler>();
+        services.AddExceptionHandler<GlobalExceptionHandler>();
         return services;
     }
 }

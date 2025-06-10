@@ -1,24 +1,37 @@
 using System.Net;
 using App.Repositories.Products;
 using App.Repositories.UnitOfWorks;
+using App.Services.ExceptionHandlers;
+using App.Services.Products.Create;
+using App.Services.Products.Update;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace App.Services.Products;
 
-public class ProductService(IProductRepository productRepository, IUnitOfWork unitOfWork): IProductService
+public class ProductService(IProductRepository productRepository, IUnitOfWork unitOfWork, IMapper mapper): IProductService
 {
     // Fast Fail Pattern: Önce olumsuz durumları kontrol et ve erken çık.
     // Guard Clause Pattern: Parametrelerin geçerliliğini kontrol et ve hataları erken bildir.
     public async Task<ServiceResult<List<ProductResponse>>> GetAllAsync()
     {
+        #region Exception Handling Example
+        // throw new CriticalException("Kritik bir hata oluştu, lütfen daha sonra tekrar deneyin.");
+        // throw new Exception("Hata oluştu, lütfen daha sonra tekrar deneyin.");
+        #endregion
+        
         var products = await productRepository.GetAll().ToListAsync();
         if (products.Count == 0)
             return ServiceResult<List<ProductResponse>>.Fail("No products found", HttpStatusCode.NotFound);
+
+        #region Manuel Mapping Example
+        // var productResponses = products.Select(p => new ProductResponse(p.Id, p.Name, p.Price, p.Stock)).ToList();
+        #endregion
         
-        var productResponses = products.Select(p => new ProductResponse(p.Id, p.Name, p.Price, p.Stock)).ToList();
+        var productResponses = mapper.Map<List<ProductResponse>>(products);
         return ServiceResult<List<ProductResponse>>.Success(productResponses);
     }
-public async Task<ServiceResult<List<ProductResponse>>> GetPagedAllListAsync(int pageNumber, int pageSize)
+    public async Task<ServiceResult<List<ProductResponse>>> GetPagedAllListAsync(int pageNumber, int pageSize)
     {
         if (pageNumber <= 0 || pageSize <= 0)
             return ServiceResult<List<ProductResponse>>.Fail("Invalid pagination parameters", HttpStatusCode.BadRequest);
@@ -31,7 +44,11 @@ public async Task<ServiceResult<List<ProductResponse>>> GetPagedAllListAsync(int
         if (products.Count == 0)
             return ServiceResult<List<ProductResponse>>.Fail("No products found", HttpStatusCode.NotFound);
         
-        var productResponses = products.Select(p => new ProductResponse(p.Id, p.Name, p.Price, p.Stock)).ToList();
+        #region Manuel Mapping Example
+        // var productResponses = products.Select(p => new ProductResponse(p.Id, p.Name, p.Price, p.Stock)).ToList();
+        #endregion
+        
+        var productResponses = mapper.Map<List<ProductResponse>>(products);
         return ServiceResult<List<ProductResponse>>.Success(productResponses);
     }
     public async Task<ServiceResult<List<ProductResponse>>> GetTopPriceAsync(int count)
@@ -40,7 +57,11 @@ public async Task<ServiceResult<List<ProductResponse>>> GetPagedAllListAsync(int
         if (products.Count == 0)
             return ServiceResult<List<ProductResponse>>.Fail("No products found", HttpStatusCode.NotFound);
         
-        var productResponses = products.Select(p => new ProductResponse(p.Id, p.Name, p.Price, p.Stock)).ToList();
+        #region Manuel Mapping Example
+        // var productResponses = products.Select(p => new ProductResponse(p.Id, p.Name, p.Price, p.Stock)).ToList();
+        #endregion
+        
+        var productResponses = mapper.Map<List<ProductResponse>>(products);
         return ServiceResult<List<ProductResponse>>.Success(productResponses);
     }
     public async Task<ServiceResult<ProductResponse>> GetByIdAsync(int id)
@@ -49,7 +70,11 @@ public async Task<ServiceResult<List<ProductResponse>>> GetPagedAllListAsync(int
         if (product == null)
             return ServiceResult<ProductResponse>.Fail("Product not found", HttpStatusCode.NotFound);
         
-        var productResponse = new ProductResponse(product.Id, product.Name, product.Price, product.Stock);
+        #region Manuel Mapping Example
+        // var productResponse = new ProductResponse(product.Id, product.Name, product.Price, product.Stock);
+        #endregion
+        
+        var productResponse = mapper.Map<ProductResponse>(product);
         return ServiceResult<ProductResponse>.Success(productResponse);
     }
     public async Task<ServiceResult<ProductCreateResponse>> CreateAsync(ProductCreateRequest request)
@@ -83,10 +108,13 @@ public async Task<ServiceResult<List<ProductResponse>>> GetPagedAllListAsync(int
         if (product == null)
             return ServiceResult.Fail("Product not found", HttpStatusCode.NotFound);
         
-        product.Name = request.Name;
-        product.Price = request.Price;
-        product.Stock = request.Stock;
+        #region Manuel Mapping Example
+        // product.Name = request.Name;
+        // product.Price = request.Price;
+        // product.Stock = request.Stock;
+        #endregion
         
+        mapper.Map(request, product);
         productRepository.Update(product);
         var result = await unitOfWork.CommitAsync();
         
@@ -94,7 +122,6 @@ public async Task<ServiceResult<List<ProductResponse>>> GetPagedAllListAsync(int
             ? ServiceResult.Fail("Failed to update product", HttpStatusCode.InternalServerError) 
             : ServiceResult.Success();
     }
-
     public async Task<ServiceResult> UpdateStockAsync(ProductUpdateStockRequest request)
     {
         var product = await productRepository.GetByIdAsync(request.id);
@@ -112,7 +139,6 @@ public async Task<ServiceResult<List<ProductResponse>>> GetPagedAllListAsync(int
             ? ServiceResult.Fail("Failed to update product stock", HttpStatusCode.InternalServerError) 
             : ServiceResult.Success();
     }
-    
     public async Task<ServiceResult> DeleteAsync(int id)
     {
         var product = await productRepository.GetByIdAsync(id);

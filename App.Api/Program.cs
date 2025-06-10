@@ -26,6 +26,8 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+app.UseExceptionHandler(e=>{});
+
 // Middleware pipeline
 if (app.Environment.IsDevelopment())
 {
