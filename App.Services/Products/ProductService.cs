@@ -1,9 +1,9 @@
 using System.Net;
 using App.Repositories.Products;
 using App.Repositories.UnitOfWorks;
-using App.Services.ExceptionHandlers;
 using App.Services.Products.Create;
 using App.Services.Products.Update;
+using App.Services.Products.UpdateStock;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
@@ -107,6 +107,10 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         var product = await productRepository.GetByIdAsync(id);
         if (product == null)
             return ServiceResult.Fail("Product not found", HttpStatusCode.NotFound);
+        
+        var isProductNameExist = await productRepository.Get(p => p.Name == request.Name && id != product.Id).AnyAsync();
+        if (isProductNameExist)
+            return ServiceResult.Fail("Aynı ürün bulunmaktadır ", HttpStatusCode.Conflict);
         
         #region Manuel Mapping Example
         // product.Name = request.Name;

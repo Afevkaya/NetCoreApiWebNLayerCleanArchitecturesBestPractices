@@ -2,6 +2,7 @@ using App.Api.Controllers.Base;
 using App.Services.Products;
 using App.Services.Products.Create;
 using App.Services.Products.Update;
+using App.Services.Products.UpdateStock;
 using Microsoft.AspNetCore.Mvc;
 
 namespace App.Api.Controllers;
