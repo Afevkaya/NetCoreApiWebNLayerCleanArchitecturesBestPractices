@@ -22,7 +22,7 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         
         var products = await productRepository.GetAll().ToListAsync();
         if (products.Count == 0)
-            return ServiceResult<List<ProductResponse>>.Fail("No products found", HttpStatusCode.NotFound);
+            return ServiceResult<List<ProductResponse>>.Fail("Ürün bulunamadı", HttpStatusCode.NotFound);
 
         #region Manuel Mapping Example
         // var productResponses = products.Select(p => new ProductResponse(p.Id, p.Name, p.Price, p.Stock)).ToList();
@@ -34,7 +34,7 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
     public async Task<ServiceResult<List<ProductResponse>>> GetPagedAllListAsync(int pageNumber, int pageSize)
     {
         if (pageNumber <= 0 || pageSize <= 0)
-            return ServiceResult<List<ProductResponse>>.Fail("Invalid pagination parameters", HttpStatusCode.BadRequest);
+            return ServiceResult<List<ProductResponse>>.Fail("Geçersiz parametre");
         
         var products = await productRepository.GetAll()
             .Skip((pageNumber - 1) * pageSize)
@@ -42,7 +42,7 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
             .ToListAsync();
         
         if (products.Count == 0)
-            return ServiceResult<List<ProductResponse>>.Fail("No products found", HttpStatusCode.NotFound);
+            return ServiceResult<List<ProductResponse>>.Fail("Ürün bulunamadı", HttpStatusCode.NotFound);
         
         #region Manuel Mapping Example
         // var productResponses = products.Select(p => new ProductResponse(p.Id, p.Name, p.Price, p.Stock)).ToList();
@@ -55,7 +55,7 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
     {
         var products = await productRepository.GetTopPriceProductsAsync(count);
         if (products.Count == 0)
-            return ServiceResult<List<ProductResponse>>.Fail("No products found", HttpStatusCode.NotFound);
+            return ServiceResult<List<ProductResponse>>.Fail("Ürün bulunamadı", HttpStatusCode.NotFound);
         
         #region Manuel Mapping Example
         // var productResponses = products.Select(p => new ProductResponse(p.Id, p.Name, p.Price, p.Stock)).ToList();
@@ -68,7 +68,7 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
     {
         var product = await productRepository.GetByIdAsync(id);
         if (product == null)
-            return ServiceResult<ProductResponse>.Fail("Product not found", HttpStatusCode.NotFound);
+            return ServiceResult<ProductResponse>.Fail("Ürün bulunamadı", HttpStatusCode.NotFound);
         
         #region Manuel Mapping Example
         // var productResponse = new ProductResponse(product.Id, product.Name, product.Price, product.Stock);
@@ -85,28 +85,22 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         if (anyProduct)
             return ServiceResult<ProductCreateResponse>.Fail("Aynı ürün bulunmaktadır ", HttpStatusCode.Conflict);
 
-        var product = new Product
-        {
-            Name = request.Name,
-            Price = request.Price,
-            Stock = request.Quantity
-        };
-        
+        var product = mapper.Map<Product>(request);
         await productRepository.InsertAsync(product);
         
         var result = await unitOfWork.CommitAsync();
         return result <= 0 
-            ? ServiceResult<ProductCreateResponse>.Fail("Failed to create product", HttpStatusCode.InternalServerError) 
+            ? ServiceResult<ProductCreateResponse>.Fail("Sistemsel hata meydana geldi", HttpStatusCode.InternalServerError) 
             : ServiceResult<ProductCreateResponse>.SuccessAsCreated(new ProductCreateResponse(product.Id),$"api/products/{product.Id}");
     }
     public async Task<ServiceResult> UpdateAsync(int id, ProductUpdateRequest request)
     {
         if (request == null)
-            return ServiceResult.Fail("Invalid request");
+            return ServiceResult.Fail("Geçersiz istek");
 
         var product = await productRepository.GetByIdAsync(id);
         if (product == null)
-            return ServiceResult.Fail("Product not found", HttpStatusCode.NotFound);
+            return ServiceResult.Fail("Ürün bulunamadı", HttpStatusCode.NotFound);
         
         var isProductNameExist = await productRepository.Get(p => p.Name == request.Name && id != product.Id).AnyAsync();
         if (isProductNameExist)
@@ -123,37 +117,37 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         var result = await unitOfWork.CommitAsync();
         
         return result <= 0 
-            ? ServiceResult.Fail("Failed to update product", HttpStatusCode.InternalServerError) 
+            ? ServiceResult.Fail("Sistemsel hata meydana geldi", HttpStatusCode.InternalServerError) 
             : ServiceResult.Success();
     }
     public async Task<ServiceResult> UpdateStockAsync(ProductUpdateStockRequest request)
     {
         var product = await productRepository.GetByIdAsync(request.id);
         if (product == null)
-            return ServiceResult.Fail("Product not found", HttpStatusCode.NotFound);
+            return ServiceResult.Fail("Ürün bulunamadı", HttpStatusCode.NotFound);
 
         if (request.stock < 0)
-            return ServiceResult.Fail("Stock cannot be negative");
+            return ServiceResult.Fail("Stok miktarı negatif olamaz");
         
         product.Stock = request.stock;
         productRepository.Update(product);
         var result = await unitOfWork.CommitAsync();
         
         return result <= 0 
-            ? ServiceResult.Fail("Failed to update product stock", HttpStatusCode.InternalServerError) 
+            ? ServiceResult.Fail("Sistemsel hata meydana geldi", HttpStatusCode.InternalServerError) 
             : ServiceResult.Success();
     }
     public async Task<ServiceResult> DeleteAsync(int id)
     {
         var product = await productRepository.GetByIdAsync(id);
         if (product == null)
-            return ServiceResult.Fail("Product not found", HttpStatusCode.NotFound);
+            return ServiceResult.Fail("Ürün bulunamadı", HttpStatusCode.NotFound);
         
         productRepository.Delete(product);
         var result = await unitOfWork.CommitAsync();
         
         return result <= 0 
-            ? ServiceResult.Fail("Failed to delete product", HttpStatusCode.InternalServerError) 
+            ? ServiceResult.Fail("Sistemsel hata meydana geldi", HttpStatusCode.InternalServerError) 
             : ServiceResult.Success();
     }
 }
