@@ -1,5 +1,6 @@
 using App.Repositories.Categories;
 using App.Repositories.Context;
+using App.Repositories.Interceptors;
 using App.Repositories.Products;
 using App.Repositories.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,8 @@ public static class RepositoryExtensions
                 {
                     npgsqlOptions.MigrationsAssembly(typeof(RepositoryAssembly).Assembly.FullName);
                 });
+            
+            options.AddInterceptors(new AuditDbContextInterceptor());
         });
         
         // Register the generic repository

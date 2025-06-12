@@ -91,7 +91,6 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
 
         var product = mapper.Map<Product>(request);
         await productRepository.InsertAsync(product);
-        
         var result = await unitOfWork.CommitAsync();
         return result <= 0 
             ? ServiceResult<ProductCreateResponse>.Fail("Sistemsel hata meydana geldi", HttpStatusCode.InternalServerError) 
@@ -123,7 +122,6 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         mapper.Map(request, product);
         productRepository.Update(product);
         var result = await unitOfWork.CommitAsync();
-        
         return result <= 0 
             ? ServiceResult.Fail("Sistemsel hata meydana geldi", HttpStatusCode.InternalServerError) 
             : ServiceResult.Success();
