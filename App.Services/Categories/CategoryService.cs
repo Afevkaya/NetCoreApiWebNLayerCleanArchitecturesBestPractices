@@ -32,8 +32,7 @@ public class CategoryService(ICategoryRepository categoryRepository, IMapper map
         var response = mapper.Map<List<CategoryWithProductsResponse>>(categories);
         return ServiceResult<List<CategoryWithProductsResponse>>.Success(response);
     }
-
-
+    
     public async Task<ServiceResult<List<CategoryResponse>>> GetAllAsync()
     {
         var categories = await categoryRepository.GetAll().ToListAsync();

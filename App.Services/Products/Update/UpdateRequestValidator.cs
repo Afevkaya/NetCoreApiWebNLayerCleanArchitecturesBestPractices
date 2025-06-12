@@ -6,6 +6,9 @@ public class UpdateRequestValidator: AbstractValidator<ProductUpdateRequest>
 {
     public UpdateRequestValidator()
     {
+        RuleFor(x => x.CategoryId)
+            .GreaterThan(0).WithMessage("Kategori Id sıfırdan büyük olmalıdır.");
+        
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("İsim alanı boş olamaz.")
             .Length(3, 100).WithMessage("İsim alanı 3 ile 100 karakter arasında olmalıdır.");

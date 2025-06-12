@@ -1,6 +1,7 @@
 using System.Net;
 using App.Repositories.Products;
 using App.Repositories.UnitOfWorks;
+using App.Services.Categories;
 using App.Services.Products.Create;
 using App.Services.Products.Response;
 using App.Services.Products.Update;
@@ -10,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace App.Services.Products;
 
-public class ProductService(IProductRepository productRepository, IUnitOfWork unitOfWork, IMapper mapper): IProductService
+public class ProductService(IProductRepository productRepository, IUnitOfWork unitOfWork, IMapper mapper, ICategoryService categoryService): IProductService
 {
     // Fast Fail Pattern: Önce olumsuz durumları kontrol et ve erken çık.
     // Guard Clause Pattern: Parametrelerin geçerliliğini kontrol et ve hataları erken bildir.
@@ -83,6 +84,10 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         var anyProduct = await productRepository.Get(p => p.Name == request.Name).AnyAsync();
         if (anyProduct)
             return ServiceResult<ProductCreateResponse>.Fail("Aynı ürün bulunmaktadır ", HttpStatusCode.Conflict);
+        
+        var category = await categoryService.GetByIdAsync(request.CategoryId);
+        if (category.IsFail)
+            return ServiceResult<ProductCreateResponse>.Fail(category.ErrorMessages!, category.HttpStatusCode);
 
         var product = mapper.Map<Product>(request);
         await productRepository.InsertAsync(product);
@@ -104,6 +109,10 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         var isProductNameExist = await productRepository.Get(p => p.Name == request.Name && id != product.Id).AnyAsync();
         if (isProductNameExist)
             return ServiceResult.Fail("Aynı ürün bulunmaktadır ", HttpStatusCode.Conflict);
+        
+        var category = await categoryService.GetByIdAsync(request.CategoryId);
+        if (category.IsFail)
+            return ServiceResult.Fail(category.ErrorMessages!, category.HttpStatusCode);
         
         #region Manuel Mapping Example
         // product.Name = request.Name;
