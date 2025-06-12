@@ -2,6 +2,7 @@ using System.Net;
 using App.Repositories.Products;
 using App.Repositories.UnitOfWorks;
 using App.Services.Products.Create;
+using App.Services.Products.Response;
 using App.Services.Products.Update;
 using App.Services.Products.UpdateStock;
 using AutoMapper;
@@ -79,8 +80,6 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
     }
     public async Task<ServiceResult<ProductCreateResponse>> CreateAsync(ProductCreateRequest request)
     {
-        if (request == null)
-            return ServiceResult<ProductCreateResponse>.Fail("Geçersiz istek");
         var anyProduct = await productRepository.Get(p => p.Name == request.Name).AnyAsync();
         if (anyProduct)
             return ServiceResult<ProductCreateResponse>.Fail("Aynı ürün bulunmaktadır ", HttpStatusCode.Conflict);
@@ -122,14 +121,14 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
     }
     public async Task<ServiceResult> UpdateStockAsync(ProductUpdateStockRequest request)
     {
-        var product = await productRepository.GetByIdAsync(request.id);
+        var product = await productRepository.GetByIdAsync(request.Id);
         if (product == null)
             return ServiceResult.Fail("Ürün bulunamadı", HttpStatusCode.NotFound);
 
-        if (request.stock < 0)
+        if (request.Stock < 0)
             return ServiceResult.Fail("Stok miktarı negatif olamaz");
         
-        product.Stock = request.stock;
+        product.Stock = request.Stock;
         productRepository.Update(product);
         var result = await unitOfWork.CommitAsync();
         

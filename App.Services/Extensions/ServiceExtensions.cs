@@ -1,4 +1,5 @@
 using System.Reflection;
+using App.Services.Categories;
 using App.Services.ExceptionHandlers;
 using App.Services.Products;
 using FluentValidation;
@@ -16,6 +17,7 @@ public static class ServiceExtensions
     {
         // Register services
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<ICategoryService, CategoryService>();
         // Add FluentValidation
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         // Add AutoMapper

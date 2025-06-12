@@ -1,3 +1,4 @@
+using App.Repositories.Categories;
 using App.Repositories.Context;
 using App.Repositories.Products;
 using App.Repositories.UnitOfWorks;
@@ -30,6 +31,7 @@ public static class RepositoryExtensions
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         // Register specific repositories if needed
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
         // Register the unit of work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

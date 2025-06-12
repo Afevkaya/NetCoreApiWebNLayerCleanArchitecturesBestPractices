@@ -1,14 +1,14 @@
 using App.Repositories.Products;
-using App.Services.Products;
 using App.Services.Products.Create;
+using App.Services.Products.Response;
 using App.Services.Products.Update;
 using AutoMapper;
 
-namespace App.Services.Mapping;
+namespace App.Services.Products;
 
-public class MappingProfile: Profile
+public class ProductMappingProfile: Profile
 {
-    public MappingProfile()
+    public ProductMappingProfile()
     {
         CreateMap<Product, ProductResponse>().ReverseMap();
         CreateMap<ProductCreateRequest, Product>()
