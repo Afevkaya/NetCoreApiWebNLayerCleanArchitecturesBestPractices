@@ -98,14 +98,7 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
     }
     public async Task<ServiceResult> UpdateAsync(int id, ProductUpdateRequest request)
     {
-        if (request == null)
-            return ServiceResult.Fail("Geçersiz istek");
-
-        var product = await productRepository.GetByIdAsync(id);
-        if (product == null)
-            return ServiceResult.Fail("Ürün bulunamadı", HttpStatusCode.NotFound);
-        
-        var isProductNameExist = await productRepository.Get(p => p.Name == request.Name && id != product.Id).AnyAsync();
+        var isProductNameExist = await productRepository.Get(p => p.Name == request.Name && p.Id != id).AnyAsync();
         if (isProductNameExist)
             return ServiceResult.Fail("Aynı ürün bulunmaktadır ", HttpStatusCode.Conflict);
         
@@ -119,7 +112,8 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
         // product.Stock = request.Stock;
         #endregion
         
-        mapper.Map(request, product);
+        var product = mapper.Map<Product>(request);
+        product.Id = id;
         productRepository.Update(product);
         var result = await unitOfWork.CommitAsync();
         return result <= 0 
@@ -146,10 +140,7 @@ public class ProductService(IProductRepository productRepository, IUnitOfWork un
     public async Task<ServiceResult> DeleteAsync(int id)
     {
         var product = await productRepository.GetByIdAsync(id);
-        if (product == null)
-            return ServiceResult.Fail("Ürün bulunamadı", HttpStatusCode.NotFound);
-        
-        productRepository.Delete(product);
+        productRepository.Delete(product!);
         var result = await unitOfWork.CommitAsync();
         
         return result <= 0 

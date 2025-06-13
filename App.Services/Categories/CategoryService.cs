@@ -67,15 +67,13 @@ public class CategoryService(ICategoryRepository categoryRepository, IMapper map
 
     public async Task<ServiceResult> UpdateAsync(int id, CategoryUpdateRequest request)
     {
-        var category = await categoryRepository.GetByIdAsync(id);
-        if (category == null)
-            return ServiceResult.Fail("Kategori bulunamadı", HttpStatusCode.NotFound);
-
         var anyCategory = await categoryRepository.Get(p => p.Name == request.Name && p.Id != id).AnyAsync();
         if (anyCategory)
             return ServiceResult.Fail("Aynı isimde kategori bulunmaktadır", HttpStatusCode.Conflict);
 
-        mapper.Map(request, category);
+        var category = mapper.Map<Category>(request);
+        category.Id = id;
+        
         categoryRepository.Update(category);
         await unitOfWork.CommitAsync();
         return ServiceResult.Success();
@@ -84,10 +82,7 @@ public class CategoryService(ICategoryRepository categoryRepository, IMapper map
     public async Task<ServiceResult> DeleteAsync(int id)
     {
         var category = await categoryRepository.GetByIdAsync(id);
-        if (category == null)
-            return ServiceResult.Fail("Kategori bulunamadı", HttpStatusCode.NotFound);
-
-        categoryRepository.Delete(category);
+        categoryRepository.Delete(category!);
         await unitOfWork.CommitAsync();
         return ServiceResult.Success();
     }

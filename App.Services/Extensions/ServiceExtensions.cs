@@ -1,8 +1,10 @@
 using System.Reflection;
 using App.Services.Categories;
 using App.Services.ExceptionHandlers;
+using App.Services.Filters;
 using App.Services.Products;
 using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,9 +17,12 @@ public static class ServiceExtensions
     // builder.Services.AddFluentValidationAutoValidation(); bu kodu DI container 'a eklemen yeterli
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<ApiBehaviorOptions>(options=> options.SuppressModelStateInvalidFilter = true);
+        
         // Register services
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped(typeof(NotFoundFilter<,>));
         // Add FluentValidation
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         // Add AutoMapper
